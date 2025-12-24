@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next gemini" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="U7J9k_gWPVMPcFptsryWQRO6YEcN2jIWIJzNXkbS2u0" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="机器学习," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="特征工程归一化1 最大最小值归一化 $$x &#x3D; \frac{x-min}{max-min}$$ 最大值往往会是一个奇异点，实际工程中会取99分位值作为最大值。 2 z标准化 $$x&#x3D;\frac{x-\mu}{\sigma}$$ 评估指标分类指标准确率和召回率$$P&#x3D;\frac{TP}{TP+FP}$$$$R&#x3D;\frac{TP}{TP+FN}$$ F1$$\frac{2}{F_1}&#x3D;\frac{1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习笔记">
+<meta property="og:url" content="https://yellowzp.github.io/machinelearning/index.html">
+<meta property="og:site_name" content="yellowzp">
+<meta property="og:description" content="特征工程归一化1 最大最小值归一化 $$x &#x3D; \frac{x-min}{max-min}$$ 最大值往往会是一个奇异点，实际工程中会取99分位值作为最大值。 2 z标准化 $$x&#x3D;\frac{x-\mu}{\sigma}$$ 评估指标分类指标准确率和召回率$$P&#x3D;\frac{TP}{TP+FP}$$$$R&#x3D;\frac{TP}{TP+FN}$$ F1$$\frac{2}{F_1}&#x3D;\frac{1">
+<meta property="article:published_time" content="2018-11-15T08:53:00.000Z">
+<meta property="article:modified_time" content="2020-04-21T07:43:48.801Z">
+<meta property="article:author" content="Rocky Yellow">
+<meta property="article:tag" content="机器学习">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<script id="MathJax-script" async src="https://fastly.jsdelivr.net/china/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+
+
+  <link rel="canonical" href="https://yellowzp.github.io/machinelearning/"/>
+
+
+
+
+  <title>机器学习笔记 | yellowzp</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?c3c7bf03d49e9a106aa539de64f55a5c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">yellowzp</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">计算机科学博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://yellowzp.github.io/machinelearning/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Rocky Yellow">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yellowzp">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">机器学习笔记</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-15T16:53:00+08:00">
+                2018-11-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">机器学习</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <!-- # 机器学习笔记 -->
+<h2 id="特征工程"><a href="#特征工程" class="headerlink" title="特征工程"></a>特征工程</h2><h3 id="归一化"><a href="#归一化" class="headerlink" title="归一化"></a>归一化</h3><p>1 最大最小值归一化</p>
+<p>$$<br>x = \frac{x-min}{max-min}<br>$$</p>
+<p>最大值往往会是一个奇异点，实际工程中会取99分位值作为最大值。</p>
+<p>2 z标准化</p>
+<p>$$<br>x=\frac{x-\mu}{\sigma}<br>$$</p>
+<h2 id="评估指标"><a href="#评估指标" class="headerlink" title="评估指标"></a>评估指标</h2><h3 id="分类指标"><a href="#分类指标" class="headerlink" title="分类指标"></a>分类指标</h3><h4 id="准确率和召回率"><a href="#准确率和召回率" class="headerlink" title="准确率和召回率"></a>准确率和召回率</h4><p>$$<br>P=\frac{TP}{TP+FP}<br>$$<br>$$<br>R=\frac{TP}{TP+FN}<br>$$</p>
+<h4 id="F1"><a href="#F1" class="headerlink" title="F1"></a>F1</h4><p>$$<br>\frac{2}{F_1}=\frac{1}{P}+\frac{1}{R}<br>$$</p>
+<h4 id="AUC"><a href="#AUC" class="headerlink" title="AUC"></a>AUC</h4><p>AUC（Area under the Curve of ROC）是ROC曲线下方的面积，是判断二分类预测模型优劣的标准。  </p>
+<p>ROC纵坐标是真正率TPR，横坐标是假正率FPR<br>$$<br>TPR=\frac{TP}{TP+FN}<br>$$<br>$$<br>FPR=\frac{FP}{FP+TN}<br>$$</p>
+<h4 id="logloss"><a href="#logloss" class="headerlink" title="logloss"></a>logloss</h4><h3 id="回归指标"><a href="#回归指标" class="headerlink" title="回归指标"></a>回归指标</h3><h4 id="MAE"><a href="#MAE" class="headerlink" title="MAE"></a>MAE</h4><p>平均绝对误差</p>
+<p>$$<br>MAE=\frac{1}{m}\sum_{i=1}^m{|(y_i-\hat{y_i})|}<br>$$</p>
+<h4 id="RMSE"><a href="#RMSE" class="headerlink" title="RMSE"></a>RMSE</h4><p>均方根误差</p>
+<p>$$<br>RMSE=\sqrt{\frac{1}{m}\sum_{i=1}^m{(y_i-\hat{y_i})^2}}<br>$$</p>
+<h3 id="排序指标"><a href="#排序指标" class="headerlink" title="排序指标"></a>排序指标</h3><h4 id="MAP"><a href="#MAP" class="headerlink" title="MAP"></a>MAP</h4><h4 id="NDCG"><a href="#NDCG" class="headerlink" title="NDCG"></a>NDCG</h4><p>搜索评价指标</p>
+<h5 id="CG"><a href="#CG" class="headerlink" title="CG"></a>CG</h5><p>cumulative gain，累计增益，它是一个搜素结果相关性分数的总和。</p>
+<p>$$<br>CG_p=\sum_{i=1}^p{rel_i}<br>$$</p>
+<p>前p个位置的CG分数，rel是相关性，</p>
+<h5 id="DCG"><a href="#DCG" class="headerlink" title="DCG"></a>DCG</h5><p>Discounted的CG，折损累计增益，目的就是为了让排名越靠前的结果越能影响最后的结果。</p>
+<p>$$<br>DCG_p=\sum_{i=1}^p{\frac{rel_i}{\log_2 (i+1)}}<br>$$</p>
+<p>还有一种比较常用的公式</p>
+<p>$$<br>DCG_p=\sum_{i=1}^p{\frac{2^{rel_i}-1}{\log_2 (i+1)}}<br>$$</p>
+<h5 id="NDCG-1"><a href="#NDCG-1" class="headerlink" title="NDCG"></a>NDCG</h5><p>Normalized的DCG，归一化折损累计增益。由于搜索结果随着检索词的不同，返回的数量是不一致的，而DCG是一个累加的值，没法针对两个不同的搜索结果进行比较，因此需要归一化处理。</p>
+<p>$$<br>NDCG_p=\frac{DCG_p}{IDCG_p}<br>$$</p>
+<p>$$<br>IDCG_p=\sum_{i=1}^{|REL|}{\frac{2^{rel_i}-1}{\log_2 (i+1)}}<br>$$</p>
+<p>|REL|表示，结果按照相关性从大到小的顺序排序，取前p个结果组成的集合。</p>
+<p>NDCG@6表示统计TOP6的增益。</p>
+<h2 id="向量的模"><a href="#向量的模" class="headerlink" title="向量的模"></a>向量的模</h2><p>$$<br>||X||=\sqrt{x_1^2+x_2^2+…+x_n^2}<br>$$</p>
+<h2 id="softmax函数"><a href="#softmax函数" class="headerlink" title="softmax函数"></a>softmax函数</h2><p>Softmax函数，或称归一化指数函数，是逻辑函数的一种推广。它能将一个含任意实数的K维向量“压缩”到另一个K维实向量中，使得每一个元素的范围都在(0, 1)之间，并且所有元素的和为1。<br>$$<br>S_i=\frac{e^{V_i}}{\sum_i^C{e^{V_i}}}<br>$$<br>Vi 是分类器前级输出单元的输出。i 表示类别索引，总的类别个数为 C。Si 表示的是当前元素的指数与所有元素指数和的比值。</p>
+<h2 id="残差"><a href="#残差" class="headerlink" title="残差"></a>残差</h2><p>真实值和预测值的差<br>$$<br>y_i-F(x_i)<br>$$</p>
+<h2 id="决策树"><a href="#决策树" class="headerlink" title="决策树"></a>决策树</h2><table>
+<thead>
+<tr>
+<th>生成算法</th>
+<th>划分标准</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID3</td>
+<td>信息增益</td>
+</tr>
+<tr>
+<td>C4.5</td>
+<td>信息增益率</td>
+</tr>
+<tr>
+<td>CART</td>
+<td>基尼指数</td>
+</tr>
+</tbody>
+</table>
+<h3 id="类型"><a href="#类型" class="headerlink" title="类型"></a>类型</h3><ol>
+<li>分类决策树</li>
+<li>回归决策树</li>
+</ol>
+<blockquote>
+<p>回归树<br><a href="https://blog.csdn.net/weixin_40604987/article/details/79296427" target="_blank" rel="noopener">https://blog.csdn.net/weixin_40604987/article/details/79296427</a></p>
+</blockquote>
+<h2 id="boosting集成学习算法"><a href="#boosting集成学习算法" class="headerlink" title="boosting集成学习算法"></a>boosting集成学习算法</h2><p>原始的boosting算法开始时，为每一个样本赋上一个权重值。在每一步训练中得到的模型，会使得数据点的估计有对有错，在每一步结束后，增加分错的点的权重，减少分对的点的权重，这样使得某些点如果老是被分错，那么就会被“严重关注”，也就被赋上一个很高的权重。然后等进行了N次迭代（由用户指定），将会得到N个简单的分类器（basic learner），然后我们将它们组合起来（比如说可以对它们进行加权、或者让它们进行投票等），得到一个最终的模型。</p>
+<h2 id="GBDT"><a href="#GBDT" class="headerlink" title="GBDT"></a>GBDT</h2><blockquote>
+<p><a href="https://www.zybuluo.com/Dounm/note/1031900" target="_blank" rel="noopener">https://www.zybuluo.com/Dounm/note/1031900</a><br><a href="https://blog.csdn.net/Gavin__Zhou/article/details/71156715" target="_blank" rel="noopener">https://blog.csdn.net/Gavin__Zhou/article/details/71156715</a></p>
+</blockquote>
+<p>GBDT是Gradient Boosting和boosting tree的结合，基学习器是树，CART树，loss函数不定。<br>训练时采用前向分步算法。</p>
+<h3 id="Gradient-Boosting"><a href="#Gradient-Boosting" class="headerlink" title="Gradient Boosting"></a>Gradient Boosting</h3><p>Gradient Boosting是boosting提升算法的一种。<br>GBDT是Gradient Boosting算法的一种实现。<br>它主要的思想是，每一次建立模型是在之前建立模型损失函数的梯度下降方向。损失函数是评价模型性能（一般为拟合程度+正则项），认为损失函数越小，性能越好。而让损失函数持续下降，就能使得模型不断改性提升性能，其最好的方法就是使损失函数沿着梯度方向下降（讲道理梯度方向上下降最快）。</p>
+<h3 id="boosting-tree"><a href="#boosting-tree" class="headerlink" title="boosting tree"></a>boosting tree</h3><p>以分类决策树或回归决策树为基学习器的boosting算法被称为提升树（Boosting Tree）</p>
+<h3 id="加法模型（一种理解）"><a href="#加法模型（一种理解）" class="headerlink" title="加法模型（一种理解）"></a>加法模型（一种理解）</h3><p>最终结果是M个基学习器结果求和得到。<br>$$<br>\hat{y_i} = \sum_{k=1}^M{f_k(x_i)}<br>$$</p>
+<p>$f_k(x_i)$是第k个学习器</p>
+<h3 id="前向分步算法"><a href="#前向分步算法" class="headerlink" title="前向分步算法"></a>前向分步算法</h3><ol>
+<li>初始化$f_0(x)=0$</li>
+<li>第t步时，得到第t个模型$f_t(x)=f_{t-1}(x)+T(x;\gamma_t)$</li>
+<li>第t步的目标函数是$(\gamma_t)=argmin\sum_{i=1}^N{L(y_i, f_{t-1}(x_i)+T(x_i;\gamma_t))}$</li>
+<li>最终模型就是等于最后一步得到的模型$f(x)=f_M(x)=\sum_{t=1}^M{T(x;\gamma_t)}$</li>
+</ol>
+<p>$T(x;\gamma_t)$是基学习器，$\gamma_t$是基学习器参数。<br>每一步得到的模型是累加的结果，每一步求解的是$T(x;\gamma_t)$。</p>
+<h3 id="GBDT的目标函数"><a href="#GBDT的目标函数" class="headerlink" title="GBDT的目标函数"></a>GBDT的目标函数</h3><h2 id="xgboost"><a href="#xgboost" class="headerlink" title="xgboost"></a>xgboost</h2><blockquote>
+<p><a href="https://blog.csdn.net/qdbszsj/article/details/79615712" target="_blank" rel="noopener">https://blog.csdn.net/qdbszsj/article/details/79615712</a></p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div id="needsharebutton-postbottom">
+            <span class="btn">
+              <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </span>
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/markdown/" rel="next" title="markdown">
+                <i class="fa fa-chevron-left"></i> markdown
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/maven_package_local_jar/" rel="prev" title="idea maven打包加载本地jar包">
+                idea maven打包加载本地jar包 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="Rocky Yellow" />
+            
+              <p class="site-author-name" itemprop="name">Rocky Yellow</p>
+              <p class="site-description motion-element" itemprop="description">沉淀技术，追求卓越！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:yellowzp@126.com" target="_blank" title="126">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/yellowzp" target="_blank" title="github">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:yellowzp.cn@gmail.com" target="_blank" title="e-mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://weibo.com/zhipenghuang" target="_blank" title="weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#特征工程"><span class="nav-number">1.</span> <span class="nav-text">特征工程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#归一化"><span class="nav-number">1.1.</span> <span class="nav-text">归一化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#评估指标"><span class="nav-number">2.</span> <span class="nav-text">评估指标</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#分类指标"><span class="nav-number">2.1.</span> <span class="nav-text">分类指标</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#准确率和召回率"><span class="nav-number">2.1.1.</span> <span class="nav-text">准确率和召回率</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#F1"><span class="nav-number">2.1.2.</span> <span class="nav-text">F1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AUC"><span class="nav-number">2.1.3.</span> <span class="nav-text">AUC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#logloss"><span class="nav-number">2.1.4.</span> <span class="nav-text">logloss</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#回归指标"><span class="nav-number">2.2.</span> <span class="nav-text">回归指标</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MAE"><span class="nav-number">2.2.1.</span> <span class="nav-text">MAE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RMSE"><span class="nav-number">2.2.2.</span> <span class="nav-text">RMSE</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#排序指标"><span class="nav-number">2.3.</span> <span class="nav-text">排序指标</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MAP"><span class="nav-number">2.3.1.</span> <span class="nav-text">MAP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NDCG"><span class="nav-number">2.3.2.</span> <span class="nav-text">NDCG</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#CG"><span class="nav-number">2.3.2.1.</span> <span class="nav-text">CG</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DCG"><span class="nav-number">2.3.2.2.</span> <span class="nav-text">DCG</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NDCG-1"><span class="nav-number">2.3.2.3.</span> <span class="nav-text">NDCG</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#向量的模"><span class="nav-number">3.</span> <span class="nav-text">向量的模</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#softmax函数"><span class="nav-number">4.</span> <span class="nav-text">softmax函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#残差"><span class="nav-number">5.</span> <span class="nav-text">残差</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#决策树"><span class="nav-number">6.</span> <span class="nav-text">决策树</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#类型"><span class="nav-number">6.1.</span> <span class="nav-text">类型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boosting集成学习算法"><span class="nav-number">7.</span> <span class="nav-text">boosting集成学习算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GBDT"><span class="nav-number">8.</span> <span class="nav-text">GBDT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Gradient-Boosting"><span class="nav-number">8.1.</span> <span class="nav-text">Gradient Boosting</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#boosting-tree"><span class="nav-number">8.2.</span> <span class="nav-text">boosting tree</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#加法模型（一种理解）"><span class="nav-number">8.3.</span> <span class="nav-text">加法模型（一种理解）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前向分步算法"><span class="nav-number">8.4.</span> <span class="nav-text">前向分步算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GBDT的目标函数"><span class="nav-number">8.5.</span> <span class="nav-text">GBDT的目标函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xgboost"><span class="nav-number">9.</span> <span class="nav-text">xgboost</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Rocky Yellow</span>
+  
+  
+  <span class="post-meta-divider">|</span>
+  <span class=BbeiAn-info">
+   浙ICP备 -
+   <a href="http://www.miitbeian.gov.cn/" target="_blank" rel="noopener">18013624号</a>
+  </span>
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+  </script>
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
